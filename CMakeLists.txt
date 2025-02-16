@@ -11,7 +11,7 @@ if (PROJECT_IS_TOP_LEVEL OR NOT LANGULUS)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
     include(LangulusUtilities.cmake)
 	if (NOT TARGET LangulusLogger)
-		fetch_langulus_module(Logger GIT_TAG 0d1d5d22e54f9ef8b371975f43638a35fe23c301)
+		fetch_langulus_module(Logger GIT_TAG f9b18f9ca69cda9b5d73b2406f23c25132c385f3)
 	endif()
 endif()
 
@@ -24,12 +24,7 @@ fetch_external_module(
 
 # Build and install Tester library											
 add_library(LangulusTesting
-	STATIC		$<TARGET_OBJECTS:LangulusLogger>
-				source/Main.cpp
-)
-
-target_compile_definitions(LangulusTesting
-    PRIVATE     LANGULUS_EXPORT_ALL
+	STATIC		source/Main.cpp
 )
 
 target_include_directories(LangulusTesting

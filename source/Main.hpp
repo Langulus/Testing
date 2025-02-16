@@ -7,7 +7,6 @@
 ///                                                                           
 #pragma once
 #include <Langulus/Core/Assume.hpp>
-#include <Langulus/Logger.hpp>
 #include <cstdint>
 #include <cstddef>
 #include <vector>

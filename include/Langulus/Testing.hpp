@@ -13,48 +13,62 @@
 #endif
 
 #include "../../source/Main.hpp"
+
+using uint = unsigned int;
 using namespace Langulus;
 
 #if LANGULUS(BENCHMARK)
    #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #endif
 
+
 #include <catch2/catch.hpp>
+
+#if LANGULUS(BENCHMARK)
+   using timer = Catch::Benchmark::Chronometer;
+
+   template<class T>
+   using uninitialized = Catch::Benchmark::storage_for<T>;
+
+   template<class T>
+   using some = std::vector<T>;
+#endif
 
 /// See https://github.com/catchorg/Catch2/blob/devel/docs/tostring.md        
 CATCH_TRANSLATE_EXCEPTION(::Langulus::Exception const& ex) {
    return fmt::format("{}", ex);
 }
 
+
 namespace Catch
 {
 
-#ifdef LANGULUS_LIBRARY_ANYNESS
+   #ifdef LANGULUS_LIBRARY_ANYNESS
 
-   /// Save catch2 from doing infinite recursions with Block types            
-   template<CT::Block T>
-   struct is_range<T> {
-      static const bool value = false;
-   };
+      /// Save catch2 from doing infinite recursions with Block types         
+      template<CT::Block T>
+      struct is_range<T> {
+         static const bool value = false;
+      };
 
-   template<class T>
-   concept StringifiableButNotRange = CT::Stringifiable<T> and not Catch::is_range<T>::value;
+      template<class T>
+      concept StringifiableButNotRange = CT::Stringifiable<T> and not Catch::is_range<T>::value;
 
-   template<StringifiableButNotRange T>
-   struct StringMaker<T> {
-      static std::string convert(T const& value) {
-         return ::std::string {Token {static_cast<Anyness::Text>(value)}};
-      }
-   };
+      template<StringifiableButNotRange T>
+      struct StringMaker<T> {
+         static std::string convert(T const& value) {
+            return ::std::string {Token {static_cast<Anyness::Text>(value)}};
+         }
+      };
 
-   /*template<CT::Stringifiable T>
-   struct StringMaker<T> {
-      static std::string convert(T const& value) {
-         return ::std::string {Token {static_cast<Text>(value)}};
-      }
-   };*/
+      /*template<CT::Stringifiable T>
+      struct StringMaker<T> {
+         static std::string convert(T const& value) {
+            return ::std::string {Token {static_cast<Text>(value)}};
+         }
+      };*/
 
-#endif
+   #endif
 
    template<>
    struct StringMaker<char8_t> {
@@ -86,18 +100,7 @@ namespace Catch
 
 }
 
-using uint = unsigned int;
-
-#if LANGULUS(BENCHMARK)
-using timer = Catch::Benchmark::Chronometer;
-
-template<class T>
-using uninitialized = Catch::Benchmark::storage_for<T>;
-
-template<class T>
-using some = std::vector<T>;
-#endif
-
+#ifdef LANGULUS_LIBRARY_LOGGER
 /// Dump parse results and requirements                                       
 template<class INPUT, class OUTPUT, class REQUIRED>
 void DumpResults(const INPUT& in, const OUTPUT& out, const REQUIRED& required) {
@@ -107,6 +110,7 @@ void DumpResults(const INPUT& in, const OUTPUT& out, const REQUIRED& required) {
    Logger::Special("Required: ", required);
    Logger::Special("-------------");
 }
+#endif
 
 #define UNSIGNED_TYPES        ::std::uint8_t, ::std::uint16_t, ::std::uint32_t, ::std::uint64_t
 #define REAL_TYPES            Float, Double
