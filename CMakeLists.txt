@@ -10,7 +10,9 @@ if (PROJECT_IS_TOP_LEVEL OR NOT LANGULUS)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
     include(LangulusUtilities.cmake)
-    fetch_langulus_module(Logger GIT_TAG 3ac6b2baf2d4294c5553f000b441c9ac80c79208)
+	if (NOT TARGET LangulusLogger)
+		fetch_langulus_module(Logger GIT_TAG 0d1d5d22e54f9ef8b371975f43638a35fe23c301)
+	endif()
 endif()
 
 # Configure Catch2															
