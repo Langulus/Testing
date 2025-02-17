@@ -11,7 +11,7 @@ if (PROJECT_IS_TOP_LEVEL OR NOT LANGULUS)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
     include(LangulusUtilities.cmake)
 	if (NOT TARGET LangulusLogger)
-		fetch_langulus_module(Logger GIT_TAG f9b18f9ca69cda9b5d73b2406f23c25132c385f3)
+		fetch_langulus_module(Logger GIT_TAG 04846e037e446b1df4d62f62afd34127fbf1804a)
 	endif()
 endif()
 
