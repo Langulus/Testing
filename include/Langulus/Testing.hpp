@@ -140,7 +140,6 @@ T CreateElement(const auto& e) {
       element = Anyness::Block<> {};
       element.Insert(e);
    }
-
    return element;
 }
 
@@ -186,18 +185,23 @@ T CreateElement(const auto& e) {
 }
 
 template<bool MANAGED = false>
-void DestroyElement(auto e) {
-   using E = decltype(e);
-   if constexpr (CT::Sparse<E>) {
-      if constexpr (CT::Referencable<Deptr<E>>)
-         e->Reference(-1);
+void DestroyElement(auto& e) {
+   using E = Deref<decltype(e)>;
+   if constexpr (not MANAGED) {
+      if constexpr (CT::Sparse<E>) {
+         if constexpr (CT::Referencable<Deptr<E>>)
+            e->Reference(-1);
 
-      if constexpr (CT::Destroyable<Decay<E>>)
-         e->~Decay<E>();
+         if constexpr (CT::Destroyable<Decay<E>>)
+            e->~Decay<E>();
 
-      if constexpr (not MANAGED)
-         free(e);
+         if constexpr (not MANAGED)
+            free(e);
+      }
+      else if constexpr (requires { DecvqCast(e).Reset(); })
+         DecvqCast(e).Reset();
    }
+   else BANK.Reset();
 }
 
 /// Simple type for testing Referenced types                                  
@@ -234,6 +238,9 @@ struct RT : Referenced {
 
    ~RT() {
       destroyed = true;
+
+      if (GetReferences() == 1)
+         Reference(-1);
    }
 
    RT& operator = (const RT& rhs) {
