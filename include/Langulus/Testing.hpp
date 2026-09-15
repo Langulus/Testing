@@ -43,7 +43,7 @@ CATCH_TRANSLATE_EXCEPTION(::Langulus::Exception const& ex) {
 namespace Catch
 {
 
-   #ifdef LANGULUS_LIBRARY_ANYNESS
+   #ifdef LANGULUS_LIBRARY_ANNIES
 
       /// Save catch2 from doing infinite recursions with Block types         
       template<CT::Block T>
@@ -57,7 +57,7 @@ namespace Catch
       template<StringifiableButNotRange T>
       struct StringMaker<T> {
          static std::string convert(T const& value) {
-            return ::std::string {Token {static_cast<Anyness::Text>(value)}};
+            return ::std::string {Token {static_cast<Annies::Text>(value)}};
          }
       };
 
@@ -120,10 +120,10 @@ void DumpResults(const INPUT& in, const OUTPUT& out, const REQUIRED& required) {
 #define ALL_TYPES             UNSIGNED_TYPES, SIGNED_TYPES
 
 
-#ifdef LANGULUS_LIBRARY_ANYNESS
+#ifdef LANGULUS_LIBRARY_ANNIES
 
 /// Just a bank container, used to contain owned items                        
-extern Anyness::TMany<Anyness::Many> BANK;
+extern Annies::TMany<Annies::Many> BANK;
 
 /// Create a dense element, on the stack                                      
 ///   @tparam T - type of element we're creating                              
@@ -134,10 +134,10 @@ T CreateElement(const auto& e) {
    T element;
    if constexpr (CT::Same<T, decltype(e)>)
       element = e;
-   else if constexpr (not CT::Same<T, Anyness::Block<>>)
+   else if constexpr (not CT::Same<T, Annies::Block<>>)
       element = Decay<T> {e};
    else {
-      element = Anyness::Block<> {};
+      element = Annies::Block<> {};
       element.Insert(e);
    }
    return element;
@@ -157,21 +157,21 @@ T CreateElement(const auto& e) {
       // memory manager. Notice we don't use 'new' operator here,       
       // because it is weakly linked, and can be overriden to use our   
       // memory manager.                                                
-      if constexpr (not CT::Same<T, Anyness::Block<>>) {
+      if constexpr (not CT::Same<T, Annies::Block<>>) {
          element = malloc(sizeof(Decay<T>));
          new (element) Decay<T> {e};
       }
       else {
-         element = malloc(sizeof(Anyness::Block<>));
-         new (element) Anyness::Block<> {};
-         static_cast<Anyness::Block<>*>(element)->Insert(e);
+         element = malloc(sizeof(Annies::Block<>));
+         new (element) Annies::Block<> {};
+         static_cast<Annies::Block<>*>(element)->Insert(e);
       }
    }
    else {
       // Create a pointer owned by the memory manager                   
-      auto& container = BANK.Emplace(Anyness::IndexBack);
+      auto& container = BANK.Emplace(Annies::IndexBack);
 
-      if constexpr (not CT::Same<T, Anyness::Block<>>) {
+      if constexpr (not CT::Same<T, Annies::Block<>>) {
          container << Decay<T> {e};
          element = container.GetRaw();
       }
