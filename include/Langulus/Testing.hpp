@@ -130,7 +130,7 @@ extern Annies::TMany<Annies::Many> BANK;
 ///   @param e - the data we'll use to initialize an instance of T            
 ///   @return the new instance of T                                           
 template<CT::Dense T, bool = false>
-T CreateElement(const auto& e) {
+T CreateElement(auto const& e) {
    T element;
    if constexpr (CT::Same<T, decltype(e)>)
       element = e;
@@ -149,7 +149,7 @@ T CreateElement(const auto& e) {
 ///   @param e - the data we'll use to initialize an instance of T            
 ///   @return pointer to the new instance of T                                
 template<CT::Sparse T, bool MANAGED = false>
-T CreateElement(const auto& e) {
+T CreateElement(auto const& e) {
    void* element;
 
    if constexpr (not MANAGED) {
