@@ -103,7 +103,7 @@ namespace Catch
 #ifdef LANGULUS_LIBRARY_LOGGER
 /// Dump parse results and requirements                                       
 template<class INPUT, class OUTPUT, class REQUIRED>
-void DumpResults(const INPUT& in, const OUTPUT& out, const REQUIRED& required) {
+void DumpResults(INPUT const& in, const OUTPUT& out, const REQUIRED& required) {
    Logger::Special("-------------");
    Logger::Special("Script:   ", in);
    Logger::Special("Parsed:   ", out);
