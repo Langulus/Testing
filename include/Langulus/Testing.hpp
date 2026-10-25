@@ -132,9 +132,9 @@ extern Annies::TMany<Annies::Many> BANK;
 template<CT::Dense T, bool = false>
 T CreateElement(auto const& e) {
    T element;
-   if constexpr (CT::Same<T, decltype(e)>)
+   if constexpr (Same<T, decltype(e)>)
       element = e;
-   else if constexpr (not CT::Same<T, Annies::Block<>>)
+   else if constexpr (not Same<T, Annies::Block<>>)
       element = Decay<T> {e};
    else {
       element = Annies::Block<> {};
@@ -157,7 +157,7 @@ T CreateElement(auto const& e) {
       // memory manager. Notice we don't use 'new' operator here,       
       // because it is weakly linked, and can be overriden to use our   
       // memory manager.                                                
-      if constexpr (not CT::Same<T, Annies::Block<>>) {
+      if constexpr (not Same<T, Annies::Block<>>) {
          element = malloc(sizeof(Decay<T>));
          new (element) Decay<T> {e};
       }
@@ -171,7 +171,7 @@ T CreateElement(auto const& e) {
       // Create a pointer owned by the memory manager                   
       auto& container = BANK.Emplace(Annies::IndexBack);
 
-      if constexpr (not CT::Same<T, Annies::Block<>>) {
+      if constexpr (not Same<T, Annies::Block<>>) {
          container << Decay<T> {e};
          element = container.GetRaw();
       }
