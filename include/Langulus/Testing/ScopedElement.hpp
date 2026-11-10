@@ -1,0 +1,167 @@
+///                                                                           
+/// Langulus::Anyness                                                         
+/// Copyright (c) 2012 Dimo Markov <team@langulus.com>                        
+/// Part of the Langulus framework, see https://langulus.com                  
+///                                                                           
+/// SPDX-License-Identifier: GPL-3.0-or-later                                 
+///                                                                           
+#pragma once
+#include <Langulus/Typenav.hpp>
+#include <Langulus/CT/Referenced.hpp>
+#include <Langulus/Allocator.hpp>
+#include <Langulus/MetaOf.hpp>
+
+
+/// Useful for creating instances of types on the heap, with multiple levels  
+/// of indirection. Automatically deallocated at end of scope.                
+template<class T, bool MANAGED = false>
+struct ScopedElement {
+   using CTTI_ReflectAs = void;
+   using CTTI_Typed     = T;
+   using Allocation     = Langulus::Allocation;
+   using AllocationPtr  = Langulus::AllocationPtr;
+   using Allocator      = Langulus::Allocator;
+
+   static constexpr bool Managed = MANAGED;
+   
+   T* element = nullptr;
+   AllocationPtr entries[Langulus::IndirectsOf<T> + 1] = {};
+
+protected:
+   /// Initialize all levels of indirection by nesting this method            
+   template<class INNER, class...A>
+   static void NestedConstructor(INNER*& place, AllocationPtr* entry, A&&...arguments) {
+      using namespace Langulus;
+      if constexpr (CT::Dense<INNER>) {
+         // Innermost dense indirection reached                         
+         if constexpr (MANAGED) {
+            if constexpr (Same<INNER, char> and IndirectsOf<T> > 0) {
+               ::std::string converted = ::std::to_string(DeintCast(arguments)...);
+               #if LANGULUS_FEATURE(MANAGED_MEMORY)
+                  *entry = Allocator::Allocate(Langulus::MetaDataOf<INNER>(), pot_t(Langulus::Roof2(converted.size()+1)));
+               #else
+                  *entry = Allocator::Allocate(pot_t(alignof(INNER)), pot_t(Langulus::Roof2(converted.size()+1)));
+               #endif
+
+               place = reinterpret_cast<INNER*>((*entry)->GetBlockStart());
+               memcpy(place, converted.c_str(), converted.size()+1);
+            }
+            else {
+               #if LANGULUS_FEATURE(MANAGED_MEMORY)
+                  *entry = Allocator::Allocate(Langulus::MetaDataOf<INNER>(), pot_t(Langulus::Roof2(sizeof(INNER))));
+               #else
+                  *entry = Allocator::Allocate(pot_t(alignof(INNER)), pot_t(Langulus::Roof2(sizeof(INNER))));
+               #endif
+
+               place = reinterpret_cast<INNER*>((*entry)->GetBlockStart());
+
+               if constexpr (requires { new INNER (LglsFwd(arguments)...); })
+                  new (place) INNER (LglsFwd(arguments)...);
+               else if constexpr (requires { new INNER (DeintCast(arguments)...); })
+                  new (place) INNER (DeintCast(arguments)...);
+               else if constexpr (requires { new INNER (INNER::FromNumber(DeintCast(arguments)...)); })
+                  new (place) INNER (INNER::FromNumber(DeintCast(arguments)...));
+               else
+                  static_assert(false, "Unable to construct");
+            }
+         }
+         else {
+            if constexpr (Same<INNER, char> and IndirectsOf<T> > 0) {
+               ::std::string converted = ::std::to_string(DeintCast(arguments)...);
+               place = (char*) malloc(converted.size()+1);
+               memcpy(place, converted.c_str(), converted.size()+1);
+            }
+            else {
+               if constexpr (requires { new INNER (LglsFwd(arguments)...); })
+                  place = new INNER (LglsFwd(arguments)...);
+               else if constexpr (requires { new INNER (DeintCast(arguments)...); })
+                  place = new INNER (DeintCast(arguments)...);
+               else if constexpr (requires { new INNER (INNER::FromNumber(DeintCast(arguments)...)); })
+                  place = new INNER (INNER::FromNumber(DeintCast(arguments)...));
+               else
+                  static_assert(false, "Unable to construct");
+            }
+         }
+      }
+      else {
+         // Allocate another indirection                                
+         if constexpr (MANAGED) {
+            #if LANGULUS_FEATURE(MANAGED_MEMORY)
+               *entry = Allocator::Allocate(Langulus::MetaDataOf<INNER>(), pot_t(Langulus::Roof2(sizeof(INNER))));
+            #else
+               *entry = Allocator::Allocate(pot_t(alignof(INNER)), pot_t(Langulus::Roof2(sizeof(INNER))));
+            #endif
+
+            place = reinterpret_cast<INNER*>((*entry)->GetBlockStart());
+         }
+         else place = new INNER {nullptr};
+
+         NestedConstructor(*place, entry + 1, LglsFwd(arguments)...);
+      }
+   }
+   
+   template<class INNER>
+   static void NestedDestructor(INNER* place, AllocationPtr* entry) {
+      using namespace Langulus;
+      if constexpr (CT::Dense<INNER>) {
+         int individual_refs = 0;
+         if constexpr (CT::Referenced<INNER>)
+            individual_refs = place->Reference(-1);
+
+         if (not *entry) {
+            LglsAssert(individual_refs == 0,
+               "Unmanaged CT::Referenced instance memory was deleted before references reach zero"
+               " - revise your test to avoid false positives."
+            );
+
+            if constexpr (Same<INNER, char> and IndirectsOf<T> > 0)
+               free(place);
+            else
+               delete place;
+         }
+         else if constexpr (MANAGED) {
+            LglsAssumeDev((*entry)->GetUses() >= 1,
+               "Managed test allocation was deallocated before the test finished. "
+               "You either forgot to Keep(), or called Free() without needing it.");
+               
+            if ((*entry)->GetUses() == 1) {
+               if constexpr (requires { place->~INNER(); })
+                  place->~INNER();
+               Allocator::Deallocate(DecvqAllCast(*entry));
+            }
+            else DecvqAllCast(*entry)->AddRef(-1);
+         }
+      }
+      else if (place) {
+         NestedDestructor(*place, entry + 1);
+
+         if (not *entry)
+            delete place;
+         else if constexpr (MANAGED) {
+            LglsAssumeDev((*entry)->GetUses() >= 1);
+            if ((*entry)->GetUses() == 1)
+               Allocator::Deallocate(DecvqAllCast(*entry));
+            else
+               DecvqAllCast(*entry)->AddRef(-1);
+         }
+      }
+   }
+
+public:
+   template<class...A>
+   ScopedElement(A&&...arguments) {
+      NestedConstructor(element, entries, LglsFwd(arguments)...);
+   }
+   
+   ~ScopedElement() {
+      NestedDestructor(element, entries);
+   }
+
+   auto operator *  ()       -> T&       {return *element;}
+   auto operator *  () const -> T const& {return *element;}
+   auto operator -> ()       -> T*       {return  element;}
+   auto operator -> () const -> T const* {return  element;}
+};
+
+template<class T>
+using ScopedElementManaged = ScopedElement<T, true>;

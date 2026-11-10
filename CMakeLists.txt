@@ -16,24 +16,23 @@ if (PROJECT_IS_TOP_LEVEL OR NOT LANGULUS)
    endif()
 endif()
 
-# Configure Catch2															
+# Configure doctest															
 fetch_external_module(
-   Catch2
-   GIT_REPOSITORY  https://github.com/catchorg/Catch2.git
-   GIT_TAG         ee1450f268dfd5c13aa8670ba97e93cabaf2e15d #v2.x
+    doctest
+    GIT_REPOSITORY  https://github.com/doctest/doctest.git
+    GIT_TAG         tags/v2.5.3
+    GIT_SHALLOW     TRUE
 )
 
 # Build and install Tester library											
 add_library(LangulusTesting STATIC source/Main.cpp)
 
-target_include_directories(LangulusTesting
-   PUBLIC   $<TARGET_PROPERTY:LangulusLogger,INTERFACE_INCLUDE_DIRECTORIES>
-            include
-)
+target_include_directories(LangulusTesting PUBLIC include)
 
+# Each test inherits the framework build environment, as well as doctest
 target_link_libraries(LangulusTesting
    PUBLIC   LangulusCore
-            Catch2
+            doctest
 )
 
 target_compile_definitions(LangulusTesting
