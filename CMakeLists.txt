@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
 project(LangulusTesting
    VERSION         1.0.0
-   DESCRIPTION     "Langulus testing utility, using the Catch2 library"
+   DESCRIPTION     "Langulus testing utility, using the doctest library"
    HOMEPAGE_URL    https://langulus.com
 )
 
@@ -11,9 +11,7 @@ if (PROJECT_IS_TOP_LEVEL OR NOT LANGULUS)
    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
    include(LangulusUtilities.cmake)
-   if (NOT TARGET LangulusLogger)
-      fetch_langulus_module(Logger GIT_TAG wip)
-   endif()
+   fetch_langulus_module(Core GIT_TAG wip)
 endif()
 
 # Configure doctest															
