@@ -8,7 +8,8 @@
 #pragma once
 #include <Langulus/Core.hpp>
 #include <Langulus/Except.hpp>
-//#include <Langulus/MetaOf.hpp>
+
+/// Doctest begins its life here                                              
 #define DOCTEST_CONFIG_VOID_CAST_EXPRESSIONS
 #include <doctest/doctest.h>
 
