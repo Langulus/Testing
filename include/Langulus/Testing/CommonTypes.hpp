@@ -63,7 +63,7 @@ struct SheddableType;
 template<CT::NotVoid T>
 struct SheddableType<T> {
    using CTTI_Sheddable = T;
-   using CTTI_Typed = T;
+   //using CTTI_Typed = T;
 
    T instance;
 
@@ -71,16 +71,25 @@ struct SheddableType<T> {
    SheddableType(Devq<T> t) : instance {LglsFwd(t)} {}
 };
 
+template<class T>
+struct TypedType {
+   using CTTI_Typed = T;
+
+   T instance;
+
+   TypedType(Devq<T> t) : instance {LglsFwd(t)} {}
+};
+
 template<CT::Void T>
 struct SheddableType<T> {
    using CTTI_Sheddable = T;
-   using CTTI_Typed = T;
+   //using CTTI_Typed = T;
 };
 
 template<>
 struct SheddableType<IncompleteType> {
    using CTTI_Sheddable = IncompleteType;
-   using CTTI_Typed = IncompleteType;
+   //using CTTI_Typed = IncompleteType;
 };
 
 template<class T>
@@ -92,6 +101,14 @@ struct SheddableTypeCastableExplicit : SheddableType<T> {
 };
 
 template<class T>
+struct TypedTypeCastableExplicit : TypedType<T> {
+   using TypedType<T>::TypedType;
+   using TypedType<T>::instance;
+   explicit operator T () noexcept { return LglsFwd(instance); }
+   explicit operator T () const noexcept { return LglsFwd(const_cast<TypedTypeCastableExplicit<T>*>(this)->instance); }
+};
+
+template<class T>
 struct SheddableTypeCastableImplicit : SheddableType<T> {
    using SheddableType<T>::SheddableType;
    using SheddableType<T>::instance;
@@ -100,9 +117,17 @@ struct SheddableTypeCastableImplicit : SheddableType<T> {
 };
 
 template<class T>
-struct SheddableTypeCastableUsingMethod : SheddableType<T> {
-   using SheddableType<T>::SheddableType;
-   using SheddableType<T>::instance;
+struct TypedTypeCastableImplicit : TypedType<T> {
+   using TypedType<T>::TypedType;
+   using TypedType<T>::instance;
+   operator T () noexcept { return LglsFwd(instance); }
+   operator T () const noexcept { return LglsFwd(const_cast<TypedTypeCastableImplicit<T>*>(this)->instance); }
+};
+
+template<class T>
+struct TypedTypeCastableUsingMethod : TypedType<T> {
+   using TypedType<T>::TypedType;
+   using TypedType<T>::instance;
    auto TypedCast()       noexcept -> T&       { return instance; }
    auto TypedCast() const noexcept -> T const& { return instance; }
 };
