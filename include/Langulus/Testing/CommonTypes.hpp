@@ -107,9 +107,12 @@ struct SheddableTypeCastableUsingMethod : SheddableType<T> {
    auto TypedCast() const noexcept -> T const& { return instance; }
 };
 
-struct SheddableTypeDerived     : SheddableType<int&> {};
-struct NonSheddableTypeDerived  : SheddableType<int&> { using CTTI_Sheddable = void; };
-struct SheddableTypeDerivedOverride  : SheddableType<int&> { using CTTI_Sheddable = bool; };
+struct SheddableTypeDerived
+   : SheddableType<int&> {};
+struct NonSheddableTypeDerived
+   : SheddableType<int&> { using CTTI_Sheddable = void; };
+struct SheddableTypeDerivedOverride
+   : SheddableType<int&> { using CTTI_Sheddable = bool; };
 
 /// MARK:Typed                                                                
 struct CustomTypedType { using CTTI_Typed = int; };
@@ -136,12 +139,21 @@ using ArrayTypeRef = int(&)[50];
 using ArrayTypeRef2 = int(&)[50][2];
 using PointerType = int*;
 using PointerType2 = int**;
-struct CustomArrayType { using CTTI_Array = Yes<56>; };
+struct CustomArrayType {
+   using CTTI_Typed = int;
+   using CTTI_Array = Yes<56>;
+};
 struct CustomNonArrayTypeDerived : CustomArrayType { using CTTI_Array = No; };
 struct CustomNonArrayType {};
 
 /// Custom pointers                                                           
-struct CustomPointerType { using CTTI_Sparse = Yup; };
+struct CustomPointerType {
+   using CTTI_Sparse = Yup;
+   
+   int operator * () const noexcept {
+      return 666;
+   }
+};
 struct CustomNonPointerType {};
 
 namespace Langulus::CTTI
