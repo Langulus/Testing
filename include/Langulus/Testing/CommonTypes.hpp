@@ -77,6 +77,12 @@ struct SheddableType<T> {
    using CTTI_Typed = T;
 };
 
+template<>
+struct SheddableType<IncompleteType> {
+   using CTTI_Sheddable = IncompleteType;
+   using CTTI_Typed = IncompleteType;
+};
+
 template<class T>
 struct SheddableTypeCastableExplicit : SheddableType<T> {
    using SheddableType<T>::SheddableType;
@@ -102,9 +108,8 @@ struct SheddableTypeCastableUsingMethod : SheddableType<T> {
 };
 
 struct SheddableTypeDerived     : SheddableType<int&> {};
-struct NonSheddableTypeDerived1 : SheddableType<int&> { using CTTI_Sheddable = No; };
-struct NonSheddableTypeDerived2 : SheddableType<int&> { using CTTI_Sheddable = void; };
-struct NonSheddableTypeDerived3 : SheddableType<int&> { using CTTI_Sheddable = Yes<>; };
+struct NonSheddableTypeDerived  : SheddableType<int&> { using CTTI_Sheddable = void; };
+struct SheddableTypeDerivedOverride  : SheddableType<int&> { using CTTI_Sheddable = bool; };
 
 /// MARK:Typed                                                                
 struct CustomTypedType { using CTTI_Typed = int; };
