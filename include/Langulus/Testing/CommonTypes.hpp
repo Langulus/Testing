@@ -616,6 +616,7 @@ namespace Langulus::CTTI
    /// Extend bool, by associating couple of constants with it                
    template<>
    struct DefineConstant<Pi> : Types<
+      NamedValue<Pi::Number, "Pi::Number", "The number Pi">,
       NamedValue<Pi::ConflictingNumber, "Pi::Number", "Conflicting number">
    > {};
 
@@ -935,3 +936,98 @@ static_assert(    ::std::is_copy_constructible_v<ForcefullyPod>);
 static_assert(    ::std::is_move_constructible_v<ForcefullyPod>);
 static_assert(not ::std::is_copy_assignable_v<ForcefullyPod>); // not available due to missing in mData (implicitly deleted because of custom constructor)
 static_assert(not ::std::is_move_assignable_v<ForcefullyPod>); // not available due to missing in mData (implicitly deleted because of custom constructor)
+
+
+namespace One::Two::Three
+{
+   struct TypeDeepIntoNamespaces;
+
+   template<class T>
+   struct TemplatedTypeDeepIntoNamespaces {
+      enum VeryDeeplyTemplatedEnum { YesYouGotThatRight };
+
+      template<class MORE>
+      struct Nested;
+   };
+
+   template<class T>
+   struct VeryComplexTemplate;
+}
+
+struct NamedUsingMember {
+   using CTTI_Named = Yes<"NameOverrideUsingMember">;
+};
+struct NamedBySpecialization {};
+
+struct Nаsty {
+   int this_type_name_contains_a_cyrillic_letter;
+};
+
+enum PiNonClass {
+   Number = 314
+};
+
+enum {
+   AnonymousNumber = 314
+};
+
+enum class PiButNamed {
+   Number = 314
+};
+
+enum PiNonClassButNamed {
+   NumberButNamed = 314
+};
+
+enum {
+   AnonymousNumberButNamed = 314,
+   AnonymousNumberButNotNamed = 315
+};
+
+using TypeDeepAlias             = One::Two::Three::TypeDeepIntoNamespaces;
+using TemplatedAlias            = One::Two::Three::TemplatedTypeDeepIntoNamespaces<uint16_t>;
+using VeryComplexTemplatedAlias = One::Two::Three::VeryComplexTemplate<
+   One::Two::Three::TemplatedTypeDeepIntoNamespaces<uint16_t>
+>;
+
+class A; class B; class C; class D; class E; class F; class G; class H; class I;
+class J; class K; class L; class M; class N; class O; class P; class Q; class R;
+class S; class T; class U; class V; class W; class X; class Y; class Z; class _;
+
+class a; class b; class c; class d; class e; class f; class g; class h; class i;
+class j; class k; class l; class m; class n; class o; class p; class q; class r;
+class s; class t; class u; class v; class w; class x; class y; class z;
+
+struct s_struct; struct t_struct; struct u_struct; struct v_struct; struct w_struct; struct x_struct; struct y_struct; struct z_struct;
+
+using Signature = void(*)(void*);
+
+namespace Langulus::CTTI
+{
+   template<>
+   struct Named<NamedBySpecialization>
+      : Yes<"NameOverridedBySpecializing_CTTI_Named"> {};
+
+   template<>
+   struct Named<NamedBySpecialization*>
+      : Yes<"NameOverridedBySpecializing_CTTI_Named_Ptr"> {};
+
+   template<>
+   struct Named<NamedBySpecialization const*> 
+      : Yes<"NameOverridedBySpecializing_CTTI_Named_ConstPtr"> {};
+
+   template<>
+   struct DefineConstant<PiNonClass> : Values<PiNonClass::Number> {};
+
+   template<>
+   struct DefineConstant<PiButNamed>
+      : NamedValue<PiButNamed::Number, "PiButNamedByCTTI"> {};
+
+   template<>
+   struct DefineConstant<PiNonClassButNamed>
+      : NamedValue<NumberButNamed, "NumberButNamedByCTTI"> {};
+
+   template<>
+   struct DefineConstant<decltype(AnonymousNumberButNamed)>
+      : NamedValue<AnonymousNumberButNamed, "AnonymousNumberButNamedByCTTI"> {};
+}
