@@ -203,20 +203,20 @@ namespace Langulus::Tags
 {
    struct Name {
       using CTTI_Versioned = Version<7, 10>;
-      using CTTI_DefineTag = Yes<"Name">;
+      using CTTI_DefineTag = NamedTag<"Name">;
       using CTTI_Info      = Yes<"Used for tagging names">;
    };
    struct ConflictingName1 {
-      using CTTI_DefineTag = Yes<"Name">;
+      using CTTI_DefineTag = NamedTag<"Name">;
    };
    struct ConflictingName2 {
-      using CTTI_DefineTag = Yes<"int">;
+      using CTTI_DefineTag = NamedTag<"int">;
    };
    struct ConflictingName3 {
-      using CTTI_DefineTag = Yes<"create">;
+      using CTTI_DefineTag = NamedTag<"create">;
    };
    struct ConflictingName4 {
-      using CTTI_DefineTag = Yes<"Pi::Number">;
+      using CTTI_DefineTag = NamedTag<"Pi::Number">;
    };
 }
 
@@ -406,7 +406,6 @@ struct ConvertibleData : ImplicitlyReflectedData {
       : member {314} {}
 
    using CTTI_Bases     = ImplicitlyReflectedData;
-   //using CTTI_MapsTo    = int;
    using CTTI_Values    = No;
 };
 static_assert(CT::POD<ConvertibleData>);
@@ -1042,4 +1041,17 @@ namespace Langulus::CTTI
    template<>
    struct DefineConstant<decltype(AnonymousNumberButNamed)>
       : NamedValue<AnonymousNumberButNamed, "AnonymousNumberButNamedByCTTI"> {};
+}
+
+namespace N1 {
+   struct EmptyType {};
+   struct Create {};
+}
+
+namespace N2 {
+   struct EmptyType {};
+}
+
+namespace N3 {
+   struct emptytype {};
 }
