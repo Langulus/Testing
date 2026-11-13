@@ -17,11 +17,13 @@
 #include <Langulus/CT/Versioned.hpp>
 #include <Langulus/CT/Deep.hpp>
 #include <Langulus/CT/DefineVerb.hpp>
+#include <Langulus/CT/DefineTag.hpp>
 #include <Langulus/CT/Members.hpp>
 #include <Langulus/CT/POD.hpp>
 #include <Langulus/CT/Pooled.hpp>
 #include <Langulus/CT/Convertible.hpp>
 #include <Langulus/CT/Describable.hpp>
+#include <Langulus/CT/Able.hpp>
 //#include "ReferencedType.hpp"
 //#include "PackedPointers.hpp"
 #include <string>
@@ -39,6 +41,14 @@ using namespace Langulus;
 using RTTI::TMeta;
 using RTTI::CMeta;
 using RTTI::VMeta;*/
+
+namespace Langulus::Annies
+{
+   struct Many;
+   struct Any;
+   template<class> struct TVerb;
+   using Verb = TVerb<void>;
+}
 
 /// MARK: Incomplete                                                          
 class IncompleteType;
@@ -59,19 +69,43 @@ struct ReflectableAsSelf    { using CTTI_ReflectAs = ReflectableAsSelf; };
 
 /// MARK: Sheddable                                                           
 template<class T>
-struct SheddableType;
-
-template<CT::NotVoid T>
-struct SheddableType<T> {
+struct SheddableType {
    using CTTI_Sheddable = T;
-   //using CTTI_Typed = T;
 
-   T instance;
+   T& instance;
 
-   /// @attention volatile arguments are deprecated in modern C++       
-   SheddableType(Devq<T> t) : instance {LglsFwd(t)} {}
+   SheddableType(T& t) : instance {t} {}
 };
 
+template<>
+struct SheddableType<IncompleteType> {
+   using CTTI_Sheddable = IncompleteType;
+};
+
+template<class T>
+struct SheddableTypeCastableExplicit : SheddableType<T> {
+   using SheddableType<T>::SheddableType;
+   using SheddableType<T>::instance;
+   explicit operator T& () noexcept { return LglsFwd(instance); }
+   explicit operator T& () const noexcept { return LglsFwd(const_cast<SheddableTypeCastableExplicit<T>*>(this)->instance); }
+};
+
+template<class T>
+struct SheddableTypeCastableImplicit : SheddableType<T> {
+   using SheddableType<T>::SheddableType;
+   using SheddableType<T>::instance;
+   operator T& () noexcept { return LglsFwd(instance); }
+   operator T& () const noexcept { return LglsFwd(const_cast<SheddableTypeCastableImplicit<T>*>(this)->instance); }
+};
+
+struct SheddableTypeDerived
+   : SheddableType<int> {};
+struct NonSheddableTypeDerived
+   : SheddableType<int> { using CTTI_Sheddable = void; };
+struct SheddableTypeDerivedOverride
+   : SheddableType<int> { using CTTI_Sheddable = bool; };
+
+/// MARK: Typed                                                               
 template<class T>
 struct TypedType {
    using CTTI_Typed = T;
@@ -81,40 +115,12 @@ struct TypedType {
    TypedType(Devq<T> t) : instance {LglsFwd(t)} {}
 };
 
-template<CT::Void T>
-struct SheddableType<T> {
-   using CTTI_Sheddable = T;
-   //using CTTI_Typed = T;
-};
-
-template<>
-struct SheddableType<IncompleteType> {
-   using CTTI_Sheddable = IncompleteType;
-   //using CTTI_Typed = IncompleteType;
-};
-
-template<class T>
-struct SheddableTypeCastableExplicit : SheddableType<T> {
-   using SheddableType<T>::SheddableType;
-   using SheddableType<T>::instance;
-   explicit operator T () noexcept { return LglsFwd(instance); }
-   explicit operator T () const noexcept { return LglsFwd(const_cast<SheddableTypeCastableExplicit<T>*>(this)->instance); }
-};
-
 template<class T>
 struct TypedTypeCastableExplicit : TypedType<T> {
    using TypedType<T>::TypedType;
    using TypedType<T>::instance;
    explicit operator T () noexcept { return LglsFwd(instance); }
    explicit operator T () const noexcept { return LglsFwd(const_cast<TypedTypeCastableExplicit<T>*>(this)->instance); }
-};
-
-template<class T>
-struct SheddableTypeCastableImplicit : SheddableType<T> {
-   using SheddableType<T>::SheddableType;
-   using SheddableType<T>::instance;
-   operator T () noexcept { return LglsFwd(instance); }
-   operator T () const noexcept { return LglsFwd(const_cast<SheddableTypeCastableImplicit<T>*>(this)->instance); }
 };
 
 template<class T>
@@ -133,14 +139,13 @@ struct TypedTypeCastableUsingMethod : TypedType<T> {
    auto TypedCast() const noexcept -> T const& { return instance; }
 };
 
-struct SheddableTypeDerived
-   : SheddableType<int&> {};
+/*struct SheddableTypeDerived //TODO typed equivalents?
+   : SheddableType<int> {};
 struct NonSheddableTypeDerived
-   : SheddableType<int&> { using CTTI_Sheddable = void; };
+   : SheddableType<int> { using CTTI_Sheddable = void; };
 struct SheddableTypeDerivedOverride
-   : SheddableType<int&> { using CTTI_Sheddable = bool; };
+   : SheddableType<int> { using CTTI_Sheddable = bool; };*/
 
-/// MARK:Typed                                                                
 struct CustomTypedType { using CTTI_Typed = int; };
 struct CustomTypedTypeDerived : CustomTypedType { };
 struct CustomUntypedType : CustomTypedType { using CTTI_Typed = void; };
@@ -222,7 +227,6 @@ namespace Langulus::Tags
 
 namespace Langulus::Flow
 {
-   struct Verb {};
    class Recipe {};
    class Recipeconst {};
    class constRecipeconst {};
@@ -233,9 +237,9 @@ namespace Langulus::Flow
 namespace Langulus::Verbs
 {
    /// Defines a verb                                                         
-   struct Create {//TODO old code
-      using CTTI_Versioned = Version<6, 10>;
-      using CTTI_DefineVerb = NamedVerb<"create", "destroy", 5.f>;
+   struct Create {
+      using CTTI_Versioned    = Version<6, 10>;
+      using CTTI_DefineVerb   = NamedVerb<"create", "destroy", 5.f>;
       using CTTI_DefineVerbOp = NamedOperator<" + ", " - ">;
       using CTTI_Info = Yes<
          "Used for allocating new elements. "
@@ -243,41 +247,7 @@ namespace Langulus::Verbs
          "you need to execute the verb in a matching producer, "
          "or that producer will be created automatically for you, if possible"
       >;
-
-      /// Allows the verb to be executed without context                      
-      static bool ExecuteContextless(Flow::Verb&) {//TODO old code
-         //Logger::Special("Verbs::Create executed without context");
-         return true;
-      }
-
-      /// Helps you specialize verbs for types/concepts                       
-      /// You can also do that, by adding a `void Create(Flow::Verb&)` in T   
-      template<class T> struct In {
-         static bool Execute(T& context, Flow::Verb& v)//TODO old code
-         requires (requires { context.Create(v); }) {
-            //Logger::Special("Verbs::Create executed using method in: ", NameOf<T>());
-            context.Create(v);
-            return true;
-         }
-      };
    };
-
-   /// Specializing for any other type                                        
-   /*template<>
-   struct Create::In<DMeta> {
-      static bool Execute(DMeta& context, Flow::Verb&) {
-         Logger::Special("Verbs::Create executed in: ", context.GetName());
-         return true;
-      }
-   };
-
-   template<>
-   struct Create::In<const DMeta> {
-      static bool Execute(const DMeta& context, Flow::Verb&) {
-         Logger::Special("Verbs::Create executed in: ", context.GetName());
-         return true;
-      }
-   };*/ //TODO
 
    struct ConflictingByPosToken1 {
       using CTTI_DefineVerb = NamedVerb<"create", "destroy_alt", 5.f>;
@@ -332,6 +302,30 @@ namespace Langulus::Verbs
    };
 }
 
+namespace Langulus::CTTI
+{
+   LglsImplementAbilitiesFor(int) {
+      using Can = Verbs::Create;
+
+      /// Binary creator                                                      
+      static bool Default(int&, Verbs::Create&) {
+         //Logger::Special("Verbs::Create binary executed in int");
+         return true;
+      }
+
+      static bool Default(int const&, Verbs::Create&) {
+         //Logger::Special("Verbs::Create binary executed in int");
+         return true;
+      }
+
+      /// Unary creator                                                       
+      static bool Default(Verbs::Create&) {
+         //Logger::Special("Verbs::Create unary executed in int");
+         return true;
+      }
+   };
+}
+
 struct ImplicitlyReflectedData {
    enum Named { One, Two, Three };
 
@@ -348,7 +342,7 @@ struct ImplicitlyReflectedData {
 class alignas(128) ImplicitlyReflectedDataWithTraits : public ImplicitlyReflectedData {
 public:
    int member {664};
-   //Tag<bool, Tags::Name> anotherMember {}; //TODO reflect tags?
+   Tags::Name anotherMember {};
    int anotherMemberArray [12] {};
    int* sparseMember {};
 
@@ -356,11 +350,11 @@ public:
       return member;
    }
 
-   void Create(Flow::Verb&) const {
+   void Create(Langulus::Annies::Verb&) const {
       //++member;
    }
 
-   void Create(Flow::Verb&) {
+   void Create(Langulus::Annies::Verb&) {
       ++member;
    }
 
@@ -379,7 +373,7 @@ public:
    using CTTI_Concrete  = ImplicitlyReflectedData;
    using CTTI_Abstract  = Yes<>;
    using CTTI_Bases     = ImplicitlyReflectedData;
-   using CTTI_Verbs     = Verbs::Create;
+   using CTTI_Ability   = Verbs::Create;
    //using CTTI_MapsTo    = int;
    using CTTI_Values    = No;
    using CTTI_MinAlloc  = Yes<1024>;
@@ -609,9 +603,7 @@ LANGULUS_MORPHISM_CUSTOM(ConvertibleToIntExternally, { return from.inner.size();
 namespace Langulus::CTTI
 {
    template<>
-   struct Named<::std::string> {
-      static constexpr Literal Name = "string";
-   };
+   struct Named<::std::string> : Yes<"string"> {};
 
    /// Extend bool, by associating couple of constants with it                
    template<>
@@ -622,11 +614,6 @@ namespace Langulus::CTTI
 
    template<>
    struct Abstract<ForcedAbstractExternally> {};
-   
-   /*template<>//TODO old code, CTTI_Ability now
-   struct Verbs<DMeta> {
-      using Type = Langulus::Verbs::Create;
-   };*/
 }
 
 struct AnotherTypeWithSimilarilyNamedValues {
