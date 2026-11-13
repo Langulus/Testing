@@ -21,6 +21,7 @@
 #include <Langulus/CT/POD.hpp>
 #include <Langulus/CT/Pooled.hpp>
 #include <Langulus/CT/Convertible.hpp>
+#include <Langulus/CT/Describable.hpp>
 //#include "ReferencedType.hpp"
 //#include "PackedPointers.hpp"
 #include <string>
@@ -790,6 +791,17 @@ static_assert(    ::std::is_copy_constructible_v<Complex>);
 static_assert(    ::std::is_move_constructible_v<Complex>);
 static_assert(not ::std::is_copy_assignable_v<Complex>);
 static_assert(not ::std::is_move_assignable_v<Complex>);
+
+/// MARK: DescribeConstructible                                               
+struct DescribeConstructible {
+   int  member;
+   bool anotherMember {};
+   int  anotherMemberArray [12] {};
+   int* sparseMember {};
+
+   DescribeConstructible(Describe&&) {}
+};
+
 
 class ContainsComplex {
    Complex mData;
