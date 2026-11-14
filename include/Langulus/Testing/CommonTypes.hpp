@@ -348,7 +348,7 @@ struct ImplicitlyReflectedData {
    enum Named { One, Two, Three };
 
    using CTTI_POD    = Yes<>;
-   using CTTI_Files  = Yes<"ASE">;
+   using CTTI_Files  = Yes<"ase">;
    using CTTI_Typed  = Named;
    using CTTI_Values = Values<One, Two, Three>;
 
@@ -368,9 +368,7 @@ public:
       return member;
    }
 
-   void Create(Langulus::Annies::Verb&) const {
-      //++member;
-   }
+   void Create(Langulus::Annies::Verb&) const {} // Should never be reflected because LglsImplementAbilitiesForConcept(AnythingWithCreateMethod, T) requires mutable only
 
    void Create(Langulus::Annies::Verb&) {
       ++member;
