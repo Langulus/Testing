@@ -1,5 +1,5 @@
 ///                                                                           
-/// Langulus::Anyness                                                         
+/// Langulus::Annies                                                           
 /// Copyright (c) 2012 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
@@ -14,7 +14,7 @@
 
 /// Simple type for testing Referenced types                                  
 struct RT : Langulus::Referenced {
-   //using Text = Langulus::Anyness::Text;
+   //using Text = Langulus::Annies  ::Text;
    //using CTTI_MapsTo = Text;
 
    int data;
@@ -93,7 +93,7 @@ struct RT : Langulus::Referenced {
 
 //static_assert(not Langulus::CT::Deep<RT>);
 
-/*LANGULUS_MORPHISM(RT, Langulus::Anyness::Text);
+/*LANGULUS_MORPHISM(RT, Langulus::Annies  ::Text);
 LANGULUS_MORPHISM_CUSTOM(RT, {
       TO bytes;
       bytes += static_cast<int32_t>(from.data);
@@ -115,8 +115,8 @@ LANGULUS_MORPHISM_CUSTOM(RT, {
       bytes += mask;
       return bytes;
    },
-   Langulus::Anyness::Bytes
+   Langulus::Annies  ::Bytes
 );
 
-static_assert(Langulus::CT::ConvertibleCustom<RT, Langulus::Anyness::Text>);
-static_assert(Langulus::CT::ConvertibleCustom<RT, Langulus::Anyness::Bytes>);*/
+static_assert(Langulus::CT::ConvertibleCustom<RT, Langulus::Annies  ::Text>);
+static_assert(Langulus::CT::ConvertibleCustom<RT, Langulus::Annies  ::Bytes>);*/

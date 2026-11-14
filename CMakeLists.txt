@@ -11,7 +11,7 @@ if (PROJECT_IS_TOP_LEVEL OR NOT LANGULUS)
    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
    include(LangulusUtilities.cmake)
-   fetch_langulus_module(Core GIT_TAG wip)
+   fetch_langulus_module(Percist GIT_TAG wip)
 endif()
 
 # Configure doctest															
@@ -29,7 +29,7 @@ target_include_directories(LangulusTesting PUBLIC include)
 
 # Each test inherits the framework build environment, as well as doctest
 target_link_libraries(LangulusTesting
-   PUBLIC   LangulusCore
+   PUBLIC   LangulusPercist
             doctest
 )
 
