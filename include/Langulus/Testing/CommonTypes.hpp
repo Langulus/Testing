@@ -324,6 +324,24 @@ namespace Langulus::CTTI
          return true;
       }
    };
+
+   template<class T>
+   concept AnythingWithCreateMethod = requires (T c, Annies::Verb& v) { c.Create(v); };
+
+   LglsImplementAbilitiesForConcept(AnythingWithCreateMethod, T) {
+      using Can = Verbs::Create;
+
+      /// Binary creator                                                      
+      static bool Default(T&, Verbs::Create&) {
+         //instance.Create(verb);
+         return true;
+      }
+
+      /*static bool Default(T const&, Verbs::Create&) { // const verb disabled, T has to be mutable to have the ability!
+         //instance.Create(verb);
+         return true;
+      }*/
+   };
 }
 
 struct ImplicitlyReflectedData {
@@ -381,7 +399,7 @@ public:
    using Self = ImplicitlyReflectedDataWithTraits;
    using CTTI_Members = Members<
       &Self::member,
-      //&Self::anotherMember, //TODO reflect tags?
+      &Self::anotherMember,
       &Self::anotherMemberArray,
       &Self::sparseMember
    >;
