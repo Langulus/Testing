@@ -1,15 +1,15 @@
 ///                                                                           
-/// Langulus::Annies                                                           
-/// Copyright (c) 2012 Dimo Markov <team@langulus.com>                        
+/// Langulus::Tester                                                          
+/// Copyright (c) 2025 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
-/// SPDX-License-Identifier: GPL-3.0-or-later                                 
+/// SPDX-License-Identifier: MIT                                              
 ///                                                                           
 #pragma once
 #include <Langulus/CT/Referenced.hpp>
 #include <Langulus/IntentOf.hpp>
-//#include <Langulus/Anyness/Text.hpp>
-//#include <Langulus/Anyness/Bytes.hpp>
+#include <Langulus/Text.hpp>
+#include <Langulus/Bytes.hpp>
 
 
 /// Simple type for testing Referenced types                                  
@@ -76,7 +76,7 @@ struct RT : Langulus::Referenced {
       return data;
    }
 
-   explicit operator ::std::string_view () const noexcept {
+   explicit operator Langulus::Annies::Text () const noexcept {
       if (copied_in)       return "RT(copied)";
       if (cloned_in)       return "RT(cloned)";
       if (copy_intent_in)  return "RT(copied with intent)";
@@ -86,14 +86,14 @@ struct RT : Langulus::Referenced {
       return "RT(unknown)";
    }
 
-   /*auto GetHash() const noexcept {
+   auto GetHash() const noexcept {
       return Langulus::HashOf(data);
-   }*/
+   }
 };
 
-//static_assert(not Langulus::CT::Deep<RT>);
+static_assert(not Langulus::CT::Deep<RT>);
 
-/*LANGULUS_MORPHISM(RT, Langulus::Annies  ::Text);
+LANGULUS_MORPHISM(RT, Langulus::Annies::Text);
 LANGULUS_MORPHISM_CUSTOM(RT, {
       TO bytes;
       bytes += static_cast<int32_t>(from.data);
@@ -119,4 +119,4 @@ LANGULUS_MORPHISM_CUSTOM(RT, {
 );
 
 static_assert(Langulus::CT::ConvertibleCustom<RT, Langulus::Annies  ::Text>);
-static_assert(Langulus::CT::ConvertibleCustom<RT, Langulus::Annies  ::Bytes>);*/
+static_assert(Langulus::CT::ConvertibleCustom<RT, Langulus::Annies  ::Bytes>);

@@ -1,9 +1,9 @@
 ///                                                                           
-/// Langulus::Annies                                                           
-/// Copyright (c) 2012 Dimo Markov <team@langulus.com>                        
+/// Langulus::Tester                                                          
+/// Copyright (c) 2025 Dimo Markov <team@langulus.com>                        
 /// Part of the Langulus framework, see https://langulus.com                  
 ///                                                                           
-/// SPDX-License-Identifier: GPL-3.0-or-later                                 
+/// SPDX-License-Identifier: MIT                                              
 ///                                                                           
 #pragma once
 #include <Langulus/Testing.hpp>
@@ -175,17 +175,27 @@ struct CustomArrayType {
    using CTTI_Array = Yes<56>;
 };
 struct CustomNonArrayTypeDerived : CustomArrayType { using CTTI_Array = No; };
-struct CustomNonArrayType {};
 
 /// Custom pointers                                                           
+template<class T>
 struct CustomPointerType {
    using CTTI_Sparse = Yup;
+
+   using MakeDecvq    = CustomPointerType<Decvq<T>>;
+   using MakeConst    = CustomPointerType<const T>;
+   using MakeDecvqAll = CustomPointerType<DecvqAll<T>>;
+   using MakeConstAll = CustomPointerType<ConstAll<T>>;
+
+   static constexpr PointerSpecification Specification {0, 0, 0};
+   using Inner = uintptr_t; 
+
+   template<class ALT>
+   using Retype = CustomPointerType<ALT>;
    
-   int operator * () const noexcept {
-      return 666;
+   T operator * () const noexcept {
+      return static_cast<T>(666);
    }
 };
-struct CustomNonPointerType {};
 
 namespace Langulus::CTTI
 {
