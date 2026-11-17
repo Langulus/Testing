@@ -216,7 +216,7 @@ namespace Langulus::CTTI
 /// MARK: Tags                                                                
 namespace Langulus::Tags
 {
-   struct Name {
+   struct TestName {
       using CTTI_Versioned = Version<7, 10>;
       using CTTI_DefineTag = NamedTag<"Name">;
       using CTTI_Info      = Yes<"Used for tagging names">;
@@ -237,9 +237,9 @@ namespace Langulus::Tags
 
 namespace Langulus::Flow
 {
-   class Recipe {};
-   class Recipeconst {};
-   class constRecipeconst {};
+   class TestRecipe {};
+   class TestRecipeconst {};
+   class constTestRecipeconst {};
    class constconst {};
 }
 
@@ -247,7 +247,7 @@ namespace Langulus::Flow
 namespace Langulus::Verbs
 {
    /// Defines a verb                                                         
-   struct Create {
+   struct TestCreate {
       using CTTI_Versioned    = Version<6, 10>;
       using CTTI_DefineVerb   = NamedVerb<"create", "destroy", 5.f>;
       using CTTI_DefineVerbOp = NamedOperator<" + ", " - ">;
@@ -315,21 +315,21 @@ namespace Langulus::Verbs
 namespace Langulus::CTTI
 {
    LglsImplementAbilitiesFor(int) {
-      using Can = Verbs::Create;
+      using Can = Verbs::TestCreate;
 
       /// Binary creator                                                      
-      static bool Default(int&, Verbs::Create&) {
+      static bool Default(int&, Verbs::TestCreate&) {
          //Logger::Special("Verbs::Create binary executed in int");
          return true;
       }
 
-      static bool Default(int const&, Verbs::Create&) {
+      static bool Default(int const&, Verbs::TestCreate&) {
          //Logger::Special("Verbs::Create binary executed in int");
          return true;
       }
 
       /// Unary creator                                                       
-      static bool Default(Verbs::Create&) {
+      static bool Default(Verbs::TestCreate&) {
          //Logger::Special("Verbs::Create unary executed in int");
          return true;
       }
@@ -339,15 +339,15 @@ namespace Langulus::CTTI
    concept AnythingWithCreateMethod = requires (T c, Annies::Verb& v) { c.Create(v); };
 
    LglsImplementAbilitiesForConcept(AnythingWithCreateMethod, T) {
-      using Can = Verbs::Create;
+      using Can = Verbs::TestCreate;
 
       /// Binary creator                                                      
-      static bool Default(T&, Verbs::Create&) {
+      static bool Default(T&, Verbs::TestCreate&) {
          //instance.Create(verb);
          return true;
       }
 
-      /*static bool Default(T const&, Verbs::Create&) { // const verb disabled, T has to be mutable to have the ability!
+      /*static bool Default(T const&, Verbs::TestCreate&) { // const verb disabled, T has to be mutable to have the ability!
          //instance.Create(verb);
          return true;
       }*/
@@ -370,7 +370,7 @@ struct ImplicitlyReflectedData {
 class alignas(128) ImplicitlyReflectedDataWithTraits : public ImplicitlyReflectedData {
 public:
    int member {664};
-   Tags::Name anotherMember {};
+   Tags::TestName anotherMember {};
    int anotherMemberArray [12] {};
    int* sparseMember {};
 
@@ -399,7 +399,7 @@ public:
    using CTTI_Concrete  = ImplicitlyReflectedData;
    using CTTI_Abstract  = Yes<>;
    using CTTI_Bases     = ImplicitlyReflectedData;
-   using CTTI_Ability   = Verbs::Create;
+   using CTTI_Ability   = Verbs::TestCreate;
    //using CTTI_MapsTo    = int;
    using CTTI_Values    = No;
    using CTTI_MinAlloc  = Yes<1024>;
