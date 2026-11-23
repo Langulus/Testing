@@ -257,6 +257,7 @@ namespace Langulus::Verbs
          "you need to execute the verb in a matching producer, "
          "or that producer will be created automatically for you, if possible"
       >;
+      using ExtendTypes = Types<>;
    };
 
    struct ConflictingByPosToken1 {
