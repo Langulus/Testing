@@ -39,7 +39,7 @@ protected:
             if constexpr (Same<INNER, char> and IndirectsOf<T> > 0) {
                ::std::string converted = ::std::to_string(DeintCast(arguments)...);
                #if LANGULUS_FEATURE(MANAGED_MEMORY)
-                  *entry = Allocator::Allocate(Langulus::MetaDataOf<INNER>(), pot_t(Langulus::Roof2(converted.size()+1)));
+                  *entry = Allocator::Allocate(Langulus::MetaDataOf<DecvqAll<INNER>>(), pot_t(Langulus::Roof2(converted.size()+1)));
                #else
                   *entry = Allocator::Allocate(pot_t(alignof(INNER)), pot_t(Langulus::Roof2(converted.size()+1)));
                #endif
@@ -49,7 +49,7 @@ protected:
             }
             else {
                #if LANGULUS_FEATURE(MANAGED_MEMORY)
-                  *entry = Allocator::Allocate(Langulus::MetaDataOf<INNER>(), pot_t(Langulus::Roof2(sizeof(INNER))));
+                  *entry = Allocator::Allocate(Langulus::MetaDataOf<DecvqAll<INNER>>(), pot_t(Langulus::Roof2(sizeof(INNER))));
                #else
                   *entry = Allocator::Allocate(pot_t(alignof(INNER)), pot_t(Langulus::Roof2(sizeof(INNER))));
                #endif
@@ -88,7 +88,7 @@ protected:
          // Allocate another indirection                                
          if constexpr (MANAGED) {
             #if LANGULUS_FEATURE(MANAGED_MEMORY)
-               *entry = Allocator::Allocate(Langulus::MetaDataOf<INNER>(), pot_t(Langulus::Roof2(sizeof(INNER))));
+               *entry = Allocator::Allocate(Langulus::MetaDataOf<DecvqAll<INNER>>(), pot_t(Langulus::Roof2(sizeof(INNER))));
             #else
                *entry = Allocator::Allocate(pot_t(alignof(INNER)), pot_t(Langulus::Roof2(sizeof(INNER))));
             #endif

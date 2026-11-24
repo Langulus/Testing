@@ -109,7 +109,7 @@ protected:
 public:
    template<class...A>
    ScopedElementPacked(A&&...arguments) {
-      *entries = Allocator::Allocate(Langulus::MetaDataOf<T>(), pot_t(Langulus::Roof2(sizeof(T))));
+      *entries = Allocator::Allocate(Langulus::MetaDataOf<DecvqAll<T>>(), pot_t(Langulus::Roof2(sizeof(T))));
       element = reinterpret_cast<T*>((*entries)->GetBlockStart());
 
       NestedConstructor(*element, entries + 1, LglsFwd(arguments)...);
